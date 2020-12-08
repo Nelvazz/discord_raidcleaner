@@ -1,0 +1,20 @@
+{
+    "token": "NzgyMzA4NDYxNjM0NzgxMTg1.X8KThw.L4MVNcJlTe8Rkj8MmrkCnVKqyPc",
+    "default_verifBot": false,
+    "default_prefix": "/",
+    "659766859088003092": {
+        "verifbot": true,
+        "modlogchannel": "782546920676524033",
+        "prefix": "/",
+        "serverlocked": false,
+        "verifbotchannel": "783636013364150282"
+    },
+    "607239478159081492": {
+        "verifbot": false,
+        "modlogchannel": "784872797205037099"
+    },
+    "782709034209116171": {
+        "verifbot": false,
+        "modlogchannel": "784883412384874516"
+    }
+}
