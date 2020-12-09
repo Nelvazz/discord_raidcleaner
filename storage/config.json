@@ -23,10 +23,12 @@
     },
     "784949113505710080": {
         "verifbot": true,
+        "verifbotchannel": "785067637465284608",
         "modlogchannel": "785072983647453195"
     },
     "706780515377741854": {
         "verifbot": true,
+        "verifbotchannel": "786232872679506000",
         "modlogchannel": "786228030045552650"
     }
 }
