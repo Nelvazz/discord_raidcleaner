@@ -106,7 +106,7 @@ bot.on('guildMemberAdd', async function(user, react) {
         .setFooter(`Server ${guildName} | Bot ${botName}`)
     let joinBotFunction = await user.guild.channels.cache.get(verifbotchannel).send(joinBotEmbed)
     await joinBotFunction.react('679355742590992414') && joinBotFunction.react('679420160452460580');
-    user.roles.add(member.guild.roles.cache.find(r => r.name === "Bot Confiné"));
+    user.roles.add(user.guild.roles.cache.find(r => r.name === "Bot Confiné"));
 
                 // Reaction Collector //
 
@@ -123,7 +123,7 @@ bot.on('guildMemberAdd', async function(user, react) {
                     .setTimestamp()
                     .setFooter(`Server ${guildName} | Bot ${botName}`)
                 joinBotFunction.edit(authorizedJoinEmbed)
-                user.roles.remove(member.guild.roles.cache.find(r => r.name === "Bot Confiné"))
+                user.roles.remove(user.guild.roles.cache.find(r => r.name === "Bot Confiné"))
                 collector.stop()
             break;
             case '679420160452460580':

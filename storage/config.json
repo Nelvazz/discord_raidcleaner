@@ -22,11 +22,11 @@
         "modlogchannel": "785976735875334154"
     },
     "784949113505710080": {
-        "verifbot": false,
+        "verifbot": true,
         "modlogchannel": "785072983647453195"
     },
     "706780515377741854": {
-        "verifbot": false,
+        "verifbot": true,
         "modlogchannel": "786228030045552650"
     }
 }
