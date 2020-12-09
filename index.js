@@ -96,7 +96,7 @@ bot.on('guildMemberAdd', async function(user, react) {
 
     const guildName = user.guild.name;
     const botName = bot.user.username;
-    if (!user.user.bot) return;
+    /*if (!user.user.bot) return;*/
     let joinBotEmbed = new Discord.MessageEmbed()
         .setColor('#141414')
         .setThumbnail('https://media.discordapp.net/attachments/783617098780901397/783617376615923722/binary-code.png')
