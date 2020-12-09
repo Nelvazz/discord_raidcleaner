@@ -188,7 +188,7 @@ bot.on('message', async function (message) {
     let prefix = await config[message.guild.id]["prefix"];
     if (prefix === undefined) prefix = default_prefix;
 
-    let args = message.content.substring(default_prefix.length).split(" ");
+    let args = message.content.substring(prefix.length).split(" ");
     if (message.author.bot) return;
     if (!message.content.startsWith(prefix)) return;
 
