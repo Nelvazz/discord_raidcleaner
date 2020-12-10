@@ -25,7 +25,7 @@ module.exports = {
             .setColor('#fe6a16')
             .setThumbnail(bot.user.displayAvatarURL())
             .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
-            .setDescription(`\n**Pseudonyme :** \n\`${bot.user.tag}\` \n\n **Description :** \n\`${bot.user.tag} est un bot qui permet de protéger vos serveurs de potentiels Raids.\` \n\n **Préfix de base :** \n\`${default_prefix}\` \n\n **Préfix du serveur :** \n\`${prefix}\` \n\n **Vérification de base :** \n\`${default_verifBottxt}\` \n\n **Vérification du serveur :** \n\`${verifbot}\` \n\n **Développeur :** \n\`Nelvazz#6862\``)
+            .setDescription(`\n**Pseudonyme :** \n\`${bot.user.tag}\` \n\n **Description :** \n\`${bot.user.tag} est un bot qui permet de protéger vos serveurs de potentiels Raids.\` \n\n **Préfix de base :** \n\`${default_prefix}\` \n\n **Préfix du serveur :** \n\`${prefix}\` \n\n **Vérification de base :** \n\`${default_verifBottxt}\` \n\n **Vérification du serveur :** \n\`${verifbot}\` \n\n **Développeur :** \n\`Nelvazz#6862\` \n\n [Serveur Support](https://discord.gg/eSrpZQRWFT) | [Vote](https://discordbotlist.com/bots/raidcleaner)`)
             .setTimestamp()
             .setFooter(`Server ${guildName} | Bot ${botName}`)
         message.channel.send(info)
