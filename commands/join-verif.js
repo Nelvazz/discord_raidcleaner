@@ -2,6 +2,14 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const config = require('../storage/config.json')
 const bot = new Discord.Client();
+const mysql = require('mysql');
+
+const db = new mysql.createConnection({
+    host: "localhost",
+    password: "",
+    user: "root",
+    database: "guilddb"
+});
 
 module.exports = {
     name: "join-verif",
@@ -47,8 +55,8 @@ module.exports = {
             }
         
             if (verifVal === "on") {
-                config[guildId]["verifbot"] = true;
-                Savebdd();
+                db.query(`UPDATE guild SET botverification = '${true}' WHERE guild = ${message.guild.id}`)
+
                 const filter = m => args[0] && m.author.id === message.author.id;
                 const collector = message.channel.createMessageCollector(filter, { time: 15000 });
             
@@ -61,15 +69,14 @@ module.exports = {
                     .setFooter(`${guildName} Server | ${botName} Bot`)
                 let channelSet = await message.channel.send(channelSetEmbed).then(
                     collector.on('collect', async function (m) {
-                        if (message.guild.channels.cache.get(`${m}`)) {
-                            config[guildId]["verifbotchannel"] = m.content;
-                            Savebdd();
-                        
+                        if (message.guild.channels.cache.get(m.content.replace(/<#/, "").replace(/>/, ""))) {
+                            db.query(`UPDATE guild SET botverificationchannel = '${m.content.replace(/<#/, "").replace(/>/, "")}' WHERE guild = ${message.guild.id}`)
+
                             channelSet.delete();
                             m.delete()
                             const channelConfEmbed = new Discord.MessageEmbed()
                                 .setColor('#F04141')
-                                .setThumbnail(bot.user.displayAvatarURL())
+                                .setThumbnail('https://media.discordapp.net/attachments/783617098780901397/807675204083122176/data-copy.png')
                                 .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
                                 .setDescription(`Le salon où vont être envoyées les vérifications est ${message.guild.channels.cache.get(`${m}`)}.`)
                                 .setTimestamp()
@@ -90,9 +97,8 @@ module.exports = {
                 )
             }
             if (verifVal === "off") {
-                config[guildId]["verifbot"] = false;
-                delete config[guildId]["verifbotchannel"];
-                Savebdd();
+                db.query(`UPDATE guild SET botverification = '${false}' WHERE guild = ${message.guild.id}`)
+
                 const configValEmbed = new Discord.MessageEmbed()
                     .setColor('#F04141')
                     .setThumbnail(bot.user.displayAvatarURL())
@@ -121,12 +127,5 @@ module.exports = {
                 }, 5000)
             )
         }
-
-        function Savebdd() {
-            fs.writeFile("./storage/config.json", JSON.stringify(config, null, 4), (err) => {
-                if (err) message.channel.send("Une erreur est survenue !");
-            });
-        }
-        Savebdd();
     }
 }

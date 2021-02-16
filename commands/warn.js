@@ -3,124 +3,264 @@ const fs = require('fs');
 const config = require('../storage/config.json')
 const bdd = require('../storage/warn.json');
 const bot = new Discord.Client();
+const mysql = require('mysql');
+
+const db = new mysql.createConnection({
+    host: "localhost",
+    password: "",
+    user: "root",
+    database: "guilddb"
+});
+
+const dbwarn = new mysql.createConnection({
+    host: "localhost",
+    password: "",
+    user: "root",
+    database: "guild"
+});
 
 module.exports = {
     name: "warn",
 
     async execute(message, args, bot) {
-        const modLogChannel = config[message.guild.id]["modlogchannel"];
-        const guildName = message.guild.name;
-        const botName = bot.user.username;
+        let sql;
+        let sqlwarn;
+        db.query(`SELECT * FROM guild WHERE guild = ${message.guild.id}`, async (err, req) => {
+            const modLogChannel = req[0].modlogchannel;
+            const guildName = message.guild.name;
+            const botName = bot.user.username;
 
-        if(message.member.hasPermission('KICK_MEMBERS')) {
-            const userMention = message.mentions.users.first();
+            if(message.member.hasPermission('KICK_MEMBERS')) {
+                const userMention = message.mentions.users.first();
 
-            if (!userMention) {
-                const noMentionEmbed = new Discord.MessageEmbed()
-                    .setColor("#DE0C78")
-                    .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
-                    .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
-                    .setDescription("Vous n'avez mentionné aucun utilisateur !")
-                    .setFooter(`Server ${guildName} | Bot ${botName}`)
-                let noMention = await message.channel.send(noMentionEmbed).then(
-                    setTimeout(() => {
-                        message.delete()
-                        noMention.delete()
-                    }, 5000)
-                )
-                return;
-            }
-            const userMentionUsername = userMention.username;
-            const userMentionID = userMention.id;
-            
-            let reason = 'Aucune raison spécifié';
-            if(args[2]) reason = args.splice(2).join(" ");
+                if (!userMention) {
+                    const noMentionEmbed = new Discord.MessageEmbed()
+                        .setColor("#DE0C78")
+                        .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
+                        .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
+                        .setDescription("Vous n'avez mentionné aucun utilisateur !")
+                        .setFooter(`Server ${guildName} | Bot ${botName}`)
+                    let noMention = await message.channel.send(noMentionEmbed).then(
+                        setTimeout(() => {
+                            message.delete()
+                            noMention.delete()
+                        }, 5000)
+                    )
+                    return;
+                }
+                const userMentionUsername = userMention.username;
+                const userMentionID = userMention.id;
 
-            if(!bdd["warn"][userMentionUsername] && !bdd["reason"][userMentionUsername]) {
-                bdd["warn"][userMentionUsername] = 1
-                bdd["reason"][userMentionUsername] = {"Premier Warn": reason}
-                Savebdd();
+                let reason = 'Aucune raison spécifié';
+                if(args[2]) reason = args.splice(2).join(" ");
 
-                message.delete();
-                const firstWarnEmbed = new Discord.MessageEmbed()
-                    .setColor('#DE0C78')
-                    .setThumbnail(userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
-                    .setAuthor(userMention.username, userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
-                    .setDescription(`<@${userMentionID}> a maintenant 1 avertissement. \n Raison : ${reason} \n Par : ${message.author.username}`)
-                    .setTimestamp()
-                    .setFooter(`${guildName} Server | ${botName} Bot`)
-                message.guild.channels.cache.get(modLogChannel).send(firstWarnEmbed);
-            } else {
-                if(bdd["warn"][userMentionUsername] == 1) {
-                    bdd["warn"][userMentionUsername]++
-                    bdd["reason"][userMentionUsername]["Deuxième Warn"] = reason
-                    Savebdd();
 
-                    message.delete();
-                    const secondWarnEmbed = new Discord.MessageEmbed()
-                        .setColor('#DE0C78')
-                        .setThumbnail(userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
-                        .setAuthor(userMention.username, userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
-                        .setDescription(`<@${userMentionID}> a maintenant 2 avertissements. \n Raison : ${reason} \n Par : ${message.author.username}`)
-                        .setTimestamp()
-                        .setFooter(`${guildName} Server | ${botName} Bot`)
-                    message.guild.channels.cache.get(modLogChannel).send(secondWarnEmbed);
-                } else {
-                    if(bdd["warn"][userMentionUsername] == 2) {
-                        bdd["warn"][userMentionUsername]++
-                        bdd["reason"][userMentionUsername]["Troisième Warn"] = reason
-                        Savebdd();
-
+                dbwarn.query(`SELECT * FROM g${message.guild.id} WHERE user = ${userMentionID}`, async (err, reqwarn) => {
+                    console.log(reqwarn[0].warn)
+                    if (err) throw err;
+                    if (reqwarn.length < 1) {
+                        sqlwarn = `INSERT INTO g${message.guild.id} (user, username, warn, reason) VALUES ('${userMentionID}', '${userMentionUsername}', '${1}', '${reason}')`
+                        dbwarn.query(sqlwarn, function(err) {
+                            if (err) throw err;
+                        })
+                        console.log("Donnée de l'utilisateur enregistré avec succès !")
                         message.delete();
-                        const thirdWarnEmbed = new Discord.MessageEmbed()
-                            .setColor('#DE0C78')
-                            .setThumbnail(userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
-                            .setAuthor(userMention.username, userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
-                            .setDescription(`<@${userMentionID}> a maintenant 3 avertissements. \n Raison : ${reason} \n Par : ${message.author.username}`)
-                            .setTimestamp()
-                            .setFooter(`${guildName} Server | ${botName} Bot`)
-                        message.guild.channels.cache.get(modLogChannel).send(thirdWarnEmbed);
-                    } else {
-                        if(bdd["warn"][userMentionUsername] == 3) {
-                            const maxWarnEmbed = new Discord.MessageEmbed()
+                        try {
+                            const firstWarnEmbed = new Discord.MessageEmbed()
+                                .setColor('#DE0C78')
+                                .setThumbnail(userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                                .setAuthor(userMention.username, userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                                .setDescription(`<@${userMentionID}> a maintenant 1 avertissement. \n Raison : ${reason} \n Par : ${message.author.username}`)
+                                .setTimestamp()
+                                .setFooter(`${guildName} Server | ${botName} Bot`)
+                            message.guild.channels.cache.get(modLogChannel).send(firstWarnEmbed);
+                        } catch {
+                            const notFoundChannelEmbed = new Discord.MessageEmbed()
                                 .setColor('#DE0C78')
                                 .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
                                 .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
-                                .setDescription(`Cet utilisateur a atteint son nombre maximum de warn !`)
+                                .setDescription(`Le salon des logs n'a pas été trouvé !\nPour redéfinir le salon de logs, veuillez éxécuter la commande \`${prefix}config logchannel #channel\`.`)
                                 .setTimestamp()
                                 .setFooter(`${guildName} Server | ${botName} Bot`)
-                            let maxWarn = await message.channel.send(maxWarnEmbed).then(
+                            let notFoundChannel = await message.channel.send(notFoundChannelEmbed).then(
                                 setTimeout(() => {
                                     message.delete()
-                                    maxWarn.delete()
-                                }, 10000)
+                                    notFoundChannel.delete()
+                                }, 5000)
                             )
                         }
-                    }
-                }
-            }
-        } else {
-            const unauthorizedEmbed = new Discord.MessageEmbed()
-                .setColor('#DE0C78')
-                .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
-                .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
-                .setDescription(`Vous n'avez pas la permissions d'éxécturer cette commande !`)
-                .setTimestamp()
-                .setFooter(`${guildName} Server | ${botName} Bot`)
-            let unauthorized = await message.channel.send(unauthorizedEmbed).then(
-                setTimeout(() => {
-                    message.delete()
-                    unauthorized.delete()
-                }, 5000)
-            )
-        }
-        
-        function Savebdd() {
-            fs.writeFile("./storage/warn.json", JSON.stringify(bdd, null, 4), (err) => {
-                if (err) message.channel.send("Une erreur est survenue !");
-            });
-        }
-        Savebdd();
+                    } else {
+                        dbwarn.query(`SELECT * FROM g${message.guild.id} WHERE user = ${userMentionID}`, async (err, reqwarn) => {
+                            if(reqwarn[0].warn == 1) {
+                                dbwarn.query(`UPDATE g${message.guild.id} SET warn = 2 WHERE user = ${userMentionID}`)
+                                const reason1 = reqwarn[0].reason;
+                                dbwarn.query(`UPDATE g${message.guild.id} SET reason = '${reason1}, ${reason}' WHERE user = ${userMentionID}`)
 
+                                message.delete();
+                                try {
+                                    const secondWarnEmbed = new Discord.MessageEmbed()
+                                        .setColor('#DE0C78')
+                                        .setThumbnail(userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                                        .setAuthor(userMention.username, userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                                        .setDescription(`<@${userMentionID}> a maintenant 2 avertissements. \n Raison : ${reason} \n Par : ${message.author.username}`)
+                                        .setTimestamp()
+                                        .setFooter(`${guildName} Server | ${botName} Bot`)
+                                    message.guild.channels.cache.get(modLogChannel).send(secondWarnEmbed);
+                                } catch {
+                                    const notFoundChannelEmbed = new Discord.MessageEmbed()
+                                        .setColor('#DE0C78')
+                                        .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
+                                        .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
+                                        .setDescription(`Le salon des logs n'a pas été trouvé !\nPour redéfinir le salon de logs, veuillez éxécuter la commande \`${prefix}config logchannel #channel\`.`)
+                                        .setTimestamp()
+                                        .setFooter(`${guildName} Server | ${botName} Bot`)
+                                    let notFoundChannel = await message.channel.send(notFoundChannelEmbed).then(
+                                        setTimeout(() => {
+                                            message.delete()
+                                            notFoundChannel.delete()
+                                        }, 5000)
+                                    )
+                                }
+                            } else {
+                                if(reqwarn[0].warn == 2) {
+                                    dbwarn.query(`UPDATE g${message.guild.id} SET warn = 3 WHERE user = ${userMentionID}`)
+                                    const reason2 = reqwarn[0].reason;
+                                    dbwarn.query(`UPDATE g${message.guild.id} SET reason = '${reason2}, ${reason}' WHERE user = ${userMentionID}`)
+                                    message.delete();
+                                    try {
+                                        const thirdWarnEmbed = new Discord.MessageEmbed()
+                                            .setColor('#DE0C78')
+                                            .setThumbnail(userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                                            .setAuthor(userMention.username, userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                                            .setDescription(`<@${userMentionID}> a maintenant 3 avertissements. \n Raison : ${reason} \n Par : ${message.author.username}`)
+                                            .setTimestamp()
+                                            .setFooter(`${guildName} Server | ${botName} Bot`)
+                                        message.guild.channels.cache.get(modLogChannel).send(thirdWarnEmbed);
+                                    } catch {
+                                        const notFoundChannelEmbed = new Discord.MessageEmbed()
+                                            .setColor('#DE0C78')
+                                            .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
+                                            .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
+                                            .setDescription(`Le salon des logs n'a pas été trouvé !\nPour redéfinir le salon de logs, veuillez éxécuter la commande \`${prefix}config logchannel #channel\`.`)
+                                            .setTimestamp()
+                                            .setFooter(`${guildName} Server | ${botName} Bot`)
+                                        let notFoundChannel = await message.channel.send(notFoundChannelEmbed).then(
+                                            setTimeout(() => {
+                                                message.delete()
+                                                notFoundChannel.delete()
+                                            }, 5000)
+                                        )
+                                    }
+                                    
+                                } else {
+                                    if(reqwarn[0].warn == 3) {
+                                        const maxWarnEmbed = new Discord.MessageEmbed()
+                                            .setColor('#DE0C78')
+                                            .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
+                                            .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
+                                            .setDescription(`Cet utilisateur a atteint son nombre maximum de warn !`)
+                                            .setTimestamp()
+                                            .setFooter(`${guildName} Server | ${botName} Bot`)
+                                        let maxWarn = await message.channel.send(maxWarnEmbed).then(
+                                            setTimeout(() => {
+                                                message.delete()
+                                                maxWarn.delete()
+                                            }, 10000)
+                                        )
+                                    }
+                                }
+                            }
+                        })
+                    }
+                })
+                /*db.query(`SELECT * FROM user WHERE user = ${userMentionID}`, async (err, req) => {
+                    if (err) throw err;
+                    if (req.length < 1) {
+                        sql = `INSERT INTO user (guild, user, username, warn, reason) VALUES ('${message.guild.id}', '${userMentionID}', '${userMentionUsername}', '${1}', '${reason}')`
+                        db.query(sql, function(err) {
+                            if (err) throw err;
+                        })
+                    
+                        console.log("Donnée de l'utilisateur enregistré avec succès !")
+                    
+                        message.delete();
+                        const firstWarnEmbed = new Discord.MessageEmbed()
+                            .setColor('#DE0C78')
+                            .setThumbnail(userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                            .setAuthor(userMention.username, userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                            .setDescription(`<@${userMentionID}> a maintenant 1 avertissement. \n Raison : ${reason} \n Par : ${message.author.username}`)
+                            .setTimestamp()
+                            .setFooter(`${guildName} Server | ${botName} Bot`)
+                        message.guild.channels.cache.get(modLogChannel).send(firstWarnEmbed);
+                    
+                    } else {
+                        db.query(`SELECT * FROM user WHERE user = ${userMentionID}`, async (err, req) => {
+                            if(req[0].warn == 1) {
+                                db.query(`UPDATE user SET warn = 2 WHERE user = ${userMentionID}`)
+                                const reason1 = req[0].reason;
+                                db.query(`UPDATE user SET reason = '${reason1}, ${reason}' WHERE user = ${userMentionID}`)
+                                // Raison 2 //
+                            
+                                message.delete();
+                                const secondWarnEmbed = new Discord.MessageEmbed()
+                                    .setColor('#DE0C78')
+                                    .setThumbnail(userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                                    .setAuthor(userMention.username, userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                                    .setDescription(`<@${userMentionID}> a maintenant 2 avertissements. \n Raison : ${reason} \n Par : ${message.author.username}`)
+                                    .setTimestamp()
+                                    .setFooter(`${guildName} Server | ${botName} Bot`)
+                                message.guild.channels.cache.get(modLogChannel).send(secondWarnEmbed);
+                            } else {
+                                if(req[0].warn == 2) {
+                                    db.query(`UPDATE user SET warn = 3 WHERE user = ${userMentionID}`)
+                                    const reason2 = req[0].reason;
+                                db.query(`UPDATE user SET reason = '${reason2}, ${reason}' WHERE user = ${userMentionID}`)
+                                
+                                    message.delete();
+                                    const thirdWarnEmbed = new Discord.MessageEmbed()
+                                        .setColor('#DE0C78')
+                                        .setThumbnail(userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                                        .setAuthor(userMention.username, userMention.displayAvatarURL({ format: 'png', dynamic: 'true' }))
+                                        .setDescription(`<@${userMentionID}> a maintenant 3 avertissements. \n Raison : ${reason} \n Par : ${message.author.username}`)
+                                        .setTimestamp()
+                                        .setFooter(`${guildName} Server | ${botName} Bot`)
+                                    message.guild.channels.cache.get(modLogChannel).send(thirdWarnEmbed);
+                                } else {
+                                    if(req[0].warn == 3) {
+                                        const maxWarnEmbed = new Discord.MessageEmbed()
+                                            .setColor('#DE0C78')
+                                            .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
+                                            .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
+                                            .setDescription(`Cet utilisateur a atteint son nombre maximum de warn !`)
+                                            .setTimestamp()
+                                            .setFooter(`${guildName} Server | ${botName} Bot`)
+                                        let maxWarn = await message.channel.send(maxWarnEmbed).then(
+                                            setTimeout(() => {
+                                                message.delete()
+                                                maxWarn.delete()
+                                            }, 10000)
+                                        )
+                                    }
+                                }
+                            }
+                        }) 
+                    }
+                })*/
+            } else {
+                const unauthorizedEmbed = new Discord.MessageEmbed()
+                    .setColor('#DE0C78')
+                    .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
+                    .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
+                    .setDescription(`Vous n'avez pas la permissions d'éxécturer cette commande !`)
+                    .setTimestamp()
+                    .setFooter(`${guildName} Server | ${botName} Bot`)
+                let unauthorized = await message.channel.send(unauthorizedEmbed).then(
+                    setTimeout(() => {
+                        message.delete()
+                        unauthorized.delete()
+                    }, 5000)
+                )
+            }
+        })
     }
 }

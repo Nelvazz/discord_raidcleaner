@@ -12,7 +12,7 @@ module.exports = {
             if (!args[1]) {
                 const noNumberEmbed = new Discord.MessageEmbed()
                     .setColor('#DE0C78')
-                    .setThumbnail(bot.user.displayAvatarURL())
+                    .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
                     .setAuthor(`${botname} Bot`, bot.user.displayAvatarURL())
                     .setDescription("Vous n'avez spécifié aucun nombre !")
                     .setTimestamp()
@@ -28,7 +28,7 @@ module.exports = {
             if (isNaN(args[1])) {
                 const nanNumberEmbed = new Discord.MessageEmbed()
                     .setColor('#DE0C78')
-                    .setThumbnail(bot.user.displayAvatarURL())
+                    .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
                     .setAuthor(`${botname} Bot`, bot.user.displayAvatarURL())
                     .setDescription(`${args[1]} n'est pas un nombre !`)
                     .setTimestamp()
@@ -59,7 +59,7 @@ module.exports = {
         } else {
             const unauthorizedEmbed = new Discord.MessageEmbed()
                 .setColor('#DE0C78')
-                .setThumbnail(bot.user.displayAvatarURL())
+                .setThumbnail('https://cdn.discordapp.com/attachments/783617098780901397/783617380696719370/warning.png')
                 .setAuthor(`${botname} Bot`, bot.user.displayAvatarURL())
                 .setDescription(`Vous n'avez pas la permissions d'éxécturer cette commande !`)
                 .setTimestamp()

@@ -2,6 +2,14 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const config = require('../storage/config.json')
 const bot = new Discord.Client();
+const mysql = require('mysql');
+
+const db = new mysql.createConnection({
+    host: "localhost",
+    password: "",
+    user: "root",
+    database: "guilddb"
+});
 
 module.exports = {
     name: "prefix",
@@ -42,8 +50,8 @@ module.exports = {
                         acceptPrefix.delete()
                     }, 10000)
                 )
-                config[guildId]["prefix"] = newprefix;
-                Savebdd();
+
+                db.query(`UPDATE guild SET prefix = '${newprefix}' WHERE guild = ${message.guild.id}`)
             }
         } else {
             const unauthorizedEmbed = new Discord.MessageEmbed()
@@ -60,12 +68,5 @@ module.exports = {
                 }, 5000)
             )
         }
-
-        function Savebdd() {
-            fs.writeFile("./storage/config.json", JSON.stringify(config, null, 4), (err) => {
-                if (err) message.channel.send("Une erreur est survenue !");
-            });
-        }
-        Savebdd();
     }
 }

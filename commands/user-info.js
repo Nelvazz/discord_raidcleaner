@@ -1,6 +1,14 @@
 const Discord = require('discord.js');
 const moment = require('moment');
 const bot = new Discord.Client();
+const mysql = require('mysql');
+
+const db = new mysql.createConnection({
+    host: "localhost",
+    password: "",
+    user: "root",
+    database: "guilddb"
+});
 
 module.exports = {
     name: "user-info",
@@ -36,18 +44,22 @@ module.exports = {
         if (userStatus === 'DND') userStatus = 'Ne Pas Déranger';
         if (userStatus === 'OFFLINE') userStatus = 'Hors Ligne';
 
-        let userinfoEmbed = new Discord.MessageEmbed()
-            .setColor("#fe6a16")
-            .setThumbnail(user.displayAvatarURL({format: 'png', dynamic: 'true'}))
-            .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
-            .setDescription(`Voici les informations de **${user.username}**`)
-            .addField(`Pseudonyme :`, `${user.tag}`)
-            .addField(`Créé le :`, `${moment.utc(user.createdTimestamp).format("DD/MM/YYYY | hh:mm:ss")}`)
-            .addField(`A rejoint le serveur le :`, `${moment.utc(member.joinedAt).format("DD/MM/YYYY | hh:mm:ss")}`)
-            .addField(`Status :`, `${userStatus}`)
-            .addField(`ID :`, `${member.id}`)
-            .setTimestamp()
-            .setFooter(`Server ${guildName} | Bot ${botName}`)
-        message.channel.send(userinfoEmbed);
+        db.query(`SELECT * FROM user WHERE user = ${user.id}`, async (err, req) => {
+            let userinfoEmbed = new Discord.MessageEmbed()
+                .setColor("#fe6a16")
+                .setThumbnail(user.displayAvatarURL({format: 'png', dynamic: 'true'}))
+                .setAuthor(`${botName} Bot`, bot.user.displayAvatarURL())
+                .setDescription(`Voici les informations de **${user.username}**`)
+                .addField(`Pseudonyme :`, `${user.tag}`)
+                .addField(`Créé le :`, `${moment.utc(user.createdTimestamp).format("DD/MM/YYYY | hh:mm:ss")}`)
+                .addField(`A rejoint le serveur le :`, `${moment.utc(member.joinedAt).format("DD/MM/YYYY | hh:mm:ss")}`)
+                .addField(`Status :`, `${userStatus}`)
+                .addField(`ID :`, `${member.id}`)
+                .setTimestamp()
+                .setFooter(`Server ${guildName} | Bot ${botName}`)
+            message.channel.send(userinfoEmbed);
+        })
+
+        
     }
 }
