@@ -18,7 +18,7 @@ const default_prefix = config.default_prefix;
 
 let sql;
 const db = new mysql.createConnection({
-    host: "localhost",
+    host: "192.168.1.72",
     password: "",
     user: "root",
     database: "guilddb"
@@ -32,7 +32,7 @@ db.connect(function (err) {
 
 let sqlwarn;
 const dbwarn = new mysql.createConnection({
-    host: "localhost",
+    host: "192.168.1.72",
     password: "",
     user: "root",
     database: "guild"
