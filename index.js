@@ -16,7 +16,7 @@ const default_prefix = config.default_prefix;
 //execFile('D:\\Games Storage\\Xampp\\apache_start.bat');
 
 
-let sql;
+/*let sql;
 const db = new mysql.createConnection({
     host: "192.168.1.72",
     password: "",
@@ -42,7 +42,7 @@ dbwarn.connect(function (err) {
     if (err) throw err;
     console.log(" ")
     console.log("\x1b[32m", "- MySQL Warn est connecté !")
-})
+})*/
 
 
 bot.commands = new Discord.Collection();
