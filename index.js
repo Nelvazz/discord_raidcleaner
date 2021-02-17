@@ -8,17 +8,9 @@ const default_verifBot = config.default_verifBot;
 const default_prefix = config.default_prefix;
 
 
-        // Launch Xampp //
-
-//var execFile = require('child_process').execFile;
-//execFile('D:\\Games Storage\\Xampp\\xampp-control.exe');
-//execFile('D:\\Games Storage\\Xampp\\mysql_start.bat');
-//execFile('D:\\Games Storage\\Xampp\\apache_start.bat');
-
-
-/*let sql;
+let sql;
 const db = new mysql.createConnection({
-    host: "192.168.1.72",
+    host: "localhost",
     password: "",
     user: "root",
     database: "guilddb"
@@ -32,7 +24,7 @@ db.connect(function (err) {
 
 let sqlwarn;
 const dbwarn = new mysql.createConnection({
-    host: "192.168.1.72",
+    host: "localhost",
     password: "",
     user: "root",
     database: "guild"
@@ -42,7 +34,7 @@ dbwarn.connect(function (err) {
     if (err) throw err;
     console.log(" ")
     console.log("\x1b[32m", "- MySQL Warn est connecté !")
-})*/
+})
 
 
 bot.commands = new Discord.Collection();
@@ -68,9 +60,15 @@ bot.on("ready", async () => {
     setInterval(() => bot.user.setActivity(`${activities[i++ % activities.length]}`, { type: 'WATCHING' }), 15000)
 });
 
-bot.on("ready", async() => {
+bot.on("ready", async guild => {
     const Guilds = bot.guilds.cache.map(guild => guild.name);
     console.log(Guilds);
+
+    //Create Guild Invite
+    /*bot.guilds.cache.forEach(guild => {
+        guild.channels.cache.filter(x => x.type != "category").random().createInvite()
+          .then(inv => console.log(`${guild.name} | ${inv.url}`));
+    });*/
 
     // Leave all server
     // const GuildsID = bot.guilds.cache.map(guild => guild.leave())
@@ -184,7 +182,6 @@ bot.on("guildCreate", async (guild) => {
         .setFooter(`Server ${guildName} | Bot ${botName}`)
     guild.owner.user.send(parameterEmbed)
 })
-
 
 
         // Check Mate Systeme //
