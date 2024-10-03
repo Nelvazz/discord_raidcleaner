@@ -1,4 +1,4 @@
 ```coffeescript
-sudo apt install raidcleaner
+> sudo apt install raidcleaner
 Error
 ```
