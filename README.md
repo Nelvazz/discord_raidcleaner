@@ -1,4 +1,5 @@
 ```coffeescript
 > sudo apt install raidcleaner
-Error
+Reading package lists... Error!
+  Encountered a section with incomplete Package: raidcleaner
 ```
